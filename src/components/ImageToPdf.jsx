@@ -12,20 +12,44 @@ const ImageToPdf = () => {
     };
 
     const generatePDF = () => {
-        if (images.length === 0) return alert("Upload at least one image!");
-        
+        if (images.length === 0) return alert("Minimal 1 gambar");
+    
         const pdf = new jsPDF();
+        const pageWidth = pdf.internal.pageSize.getWidth();
+        const pageHeight = pdf.internal.pageSize.getHeight();
+    
         images.forEach((img, index) => {
             if (index !== 0) pdf.addPage();
-
-            let format = "JPEG"; // Default JPG/JPEG
-            if (img.startsWith("data:image/png")) {
-                format = "PNG";
-            }
-            pdf.addImage(img, format, 15, 10, 180, 280);
+    
+            const imageObj = new Image();
+            imageObj.src = img;
+            
+            imageObj.onload = function () {
+                let imgWidth = imageObj.width;
+                let imgHeight = imageObj.height;
+    
+                // Hitung skala agar sesuai dengan ukuran halaman
+                let scale = Math.min(pageWidth / imgWidth, pageHeight / imgHeight);
+                let newWidth = imgWidth * scale;
+                let newHeight = imgHeight * scale;
+    
+                // Pusatkan gambar di halaman PDF
+                let xPos = (pageWidth - newWidth) / 2;
+                let yPos = (pageHeight - newHeight) / 2;
+    
+                // Tentukan format gambar
+                let format = img.startsWith("data:image/png") ? "PNG" : "JPEG";
+    
+                pdf.addImage(img, format, xPos, yPos, newWidth, newHeight);
+                
+                // Simpan PDF setelah gambar terakhir diproses
+                if (index === images.length - 1) {
+                    pdf.save("converted.pdf");
+                }
+            };
         });
-        pdf.save("converted.pdf");
     };
+    
 
     return (
         <div className="bg-slate-200 max-w-lg mx-auto shadow-lg rounded-lg p-6 space-y-4">
