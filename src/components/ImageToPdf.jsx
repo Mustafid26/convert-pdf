@@ -17,7 +17,12 @@ const ImageToPdf = () => {
         const pdf = new jsPDF();
         images.forEach((img, index) => {
             if (index !== 0) pdf.addPage();
-            pdf.addImage(img, "JPEG", 10, 10, 180, 150);
+
+            let format = "JPEG"; // Default JPG/JPEG
+            if (img.startsWith("data:image/png")) {
+                format = "PNG";
+            }
+            pdf.addImage(img, format, 10, 10, 180, 150);
         });
         pdf.save("converted.pdf");
     };
