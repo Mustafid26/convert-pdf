@@ -22,7 +22,7 @@ const ImageToPdf = () => {
             if (img.startsWith("data:image/png")) {
                 format = "PNG";
             }
-            pdf.addImage(img, format, 10, 10, 180, 150);
+            pdf.addImage(img, format, 15, 10, 180, 280);
         });
         pdf.save("converted.pdf");
     };
