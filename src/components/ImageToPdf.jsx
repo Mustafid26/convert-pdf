@@ -11,44 +11,43 @@ const ImageToPdf = () => {
         setImages(imgURLs);
     };
 
-    const generatePDF = () => {
-        if (images.length === 0) return alert("Minimal 1 gambar");
+    const generatePDF = async () => {
+        if (images.length === 0) return alert("Upload at least one image!");
     
         const pdf = new jsPDF();
         const pageWidth = pdf.internal.pageSize.getWidth();
         const pageHeight = pdf.internal.pageSize.getHeight();
     
-        images.forEach((img, index) => {
-            if (index !== 0) pdf.addPage();
+        for (let i = 0; i < images.length; i++) {
+            if (i !== 0) pdf.addPage(); // Tambah halaman jika ada lebih dari satu gambar
     
-            const imageObj = new Image();
-            imageObj.src = img;
-            
-            imageObj.onload = function () {
-                let imgWidth = imageObj.width;
-                let imgHeight = imageObj.height;
+            await new Promise((resolve) => {
+                const img = new Image();
+                img.src = images[i];
     
-                // Hitung skala agar sesuai dengan ukuran halaman
-                let scale = Math.min(pageWidth / imgWidth, pageHeight / imgHeight);
-                let newWidth = imgWidth * scale;
-                let newHeight = imgHeight * scale;
+                img.onload = function () {
+                    let imgWidth = img.width;
+                    let imgHeight = img.height;
     
-                // Pusatkan gambar di halaman PDF
-                let xPos = (pageWidth - newWidth) / 2;
-                let yPos = (pageHeight - newHeight) / 2;
+                    // Hitung skala agar gambar tetap proporsional
+                    let scale = Math.min(pageWidth / imgWidth, pageHeight / imgHeight);
+                    let newWidth = imgWidth * scale;
+                    let newHeight = imgHeight * scale;
     
-                // Tentukan format gambar
-                let format = img.startsWith("data:image/png") ? "PNG" : "JPEG";
+                    // Posisi agar gambar di tengah halaman
+                    let xPos = (pageWidth - newWidth) / 2;
+                    let yPos = (pageHeight - newHeight) / 2;
     
-                pdf.addImage(img, format, xPos, yPos, newWidth, newHeight);
-                
-                // Simpan PDF setelah gambar terakhir diproses
-                if (index === images.length - 1) {
-                    pdf.save("converted.pdf");
-                }
-            };
-        });
-    };
+                    // Tentukan format gambar
+                    let format = images[i].startsWith("data:image/png") ? "PNG" : "JPEG";
+    
+                    pdf.addImage(images[i], format, xPos, yPos, newWidth, newHeight);
+                    resolve(); // Selesaikan load gambar sebelum lanjut ke gambar berikutnya
+                };
+            });
+        }
+        pdf.save("converted.pdf");
+    };    
     
 
     return (
